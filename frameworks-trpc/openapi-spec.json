@@ -1,0 +1,831 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Train Travel API",
+    "description": "API for finding and booking train trips across Europe.",
+    "version": "1.2.1",
+    "contact": {
+      "name": "Train Support",
+      "url": "https://example.com/support",
+      "email": "support@example.com"
+    },
+    "license": {
+      "name": "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International",
+      "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://try.microcks.io/rest/Train+Travel+API/1.0.0",
+      "description": "Mock Server"
+    },
+    {
+      "url": "https://api.example.com",
+      "description": "Production"
+    }
+  ],
+  "paths": {
+    "/stations": {
+      "get": {
+        "operationId": "getStations",
+        "summary": "Get a list of train stations",
+        "description": "Returns a paginated and searchable list of all train stations.",
+        "tags": [
+          "Stations"
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "Berlin"
+          },
+          {
+            "name": "country",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "DE"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "Unique station ID"
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "Name of the station"
+                          },
+                          "address": {
+                            "type": "string",
+                            "description": "Street address of the station"
+                          },
+                          "country_code": {
+                            "type": "string",
+                            "description": "ISO 3166-1 alpha-2 country code"
+                          },
+                          "timezone": {
+                            "type": "string",
+                            "description": "IANA timezone of the station"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name",
+                          "address",
+                          "country_code"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ],
+                  "additionalProperties": false
+                },
+                "example": {
+                  "data": [
+                    {
+                      "id": "efdbb9d1-02c2-4bc3-afb7-6788d8782b1e",
+                      "name": "Berlin Hauptbahnhof",
+                      "address": "Invalidenstrasse 10557 Berlin, Germany",
+                      "country_code": "DE",
+                      "timezone": "Europe/Berlin"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/error"
+          }
+        }
+      }
+    },
+    "/trips": {
+      "get": {
+        "operationId": "getTrips",
+        "summary": "Get available train trips",
+        "description": "Returns a list of available train trips between two stations on a given date.",
+        "tags": [
+          "Trips"
+        ],
+        "parameters": [
+          {
+            "name": "origin",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "ID of the origin station",
+            "example": "efdbb9d1-02c2-4bc3-afb7-6788d8782b1e"
+          },
+          {
+            "name": "destination",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "ID of the destination station",
+            "example": "b2e783e1-c824-4d63-b37a-d8d698862f1d"
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Travel date in YYYY-MM-DD format",
+            "example": "2024-02-01"
+          },
+          {
+            "name": "bicycles",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "dogs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "Unique trip ID"
+                          },
+                          "origin": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "ID of the origin station"
+                          },
+                          "destination": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "ID of the destination station"
+                          },
+                          "departure_time": {
+                            "type": "string",
+                            "description": "Departure time in ISO 8601 format"
+                          },
+                          "arrival_time": {
+                            "type": "string",
+                            "description": "Arrival time in ISO 8601 format"
+                          },
+                          "price": {
+                            "type": "number",
+                            "description": "Ticket price in euros"
+                          },
+                          "operator": {
+                            "type": "string",
+                            "description": "Train operator name"
+                          },
+                          "bicycles_allowed": {
+                            "type": "boolean",
+                            "description": "Whether bicycles are permitted"
+                          },
+                          "dogs_allowed": {
+                            "type": "boolean",
+                            "description": "Whether dogs are permitted"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "origin",
+                          "destination",
+                          "departure_time",
+                          "arrival_time",
+                          "price",
+                          "operator",
+                          "bicycles_allowed",
+                          "dogs_allowed"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ],
+                  "additionalProperties": false
+                },
+                "example": {
+                  "data": [
+                    {
+                      "id": "ea399ba1-6d95-433f-92d1-83f67b775594",
+                      "origin": "efdbb9d1-02c2-4bc3-afb7-6788d8782b1e",
+                      "destination": "b2e783e1-c824-4d63-b37a-d8d698862f1d",
+                      "departure_time": "2024-02-01T10:00:00Z",
+                      "arrival_time": "2024-02-01T16:00:00Z",
+                      "price": 50,
+                      "operator": "Deutsche Bahn",
+                      "bicycles_allowed": true,
+                      "dogs_allowed": true
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-speakeasy-name-override": "searchTrips",
+        "x-speakeasy-retries": {
+          "strategy": "backoff",
+          "backoff": {
+            "initialInterval": 500,
+            "maxInterval": 60000,
+            "maxElapsedTime": 3600000,
+            "exponent": 1.5
+          },
+          "statusCodes": [
+            "5XX"
+          ],
+          "retryConnectionErrors": true
+        }
+      }
+    },
+    "/bookings": {
+      "get": {
+        "operationId": "getBookings",
+        "summary": "List existing bookings",
+        "description": "Returns a list of all bookings associated with the authenticated user.",
+        "tags": [
+          "Bookings"
+        ],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "Unique booking ID"
+                          },
+                          "trip_id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "ID of the booked trip"
+                          },
+                          "passenger_name": {
+                            "type": "string",
+                            "description": "Full name of the passenger"
+                          },
+                          "has_bicycle": {
+                            "type": "boolean",
+                            "description": "Whether the passenger has a bicycle"
+                          },
+                          "has_dog": {
+                            "type": "boolean",
+                            "description": "Whether the passenger has a dog"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "trip_id",
+                          "passenger_name",
+                          "has_bicycle",
+                          "has_dog"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/error"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createBooking",
+        "summary": "Create a booking",
+        "description": "Creates a new booking for a selected train trip.",
+        "tags": [
+          "Bookings"
+        ],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "trip_id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "ID of the trip to book"
+                  },
+                  "passenger_name": {
+                    "type": "string",
+                    "description": "Full name of the passenger"
+                  },
+                  "has_bicycle": {
+                    "type": "boolean",
+                    "description": "Whether the passenger has a bicycle"
+                  },
+                  "has_dog": {
+                    "type": "boolean",
+                    "description": "Whether the passenger has a dog"
+                  }
+                },
+                "required": [
+                  "trip_id",
+                  "passenger_name"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "Unique booking ID"
+                    },
+                    "trip_id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "ID of the booked trip"
+                    },
+                    "passenger_name": {
+                      "type": "string",
+                      "description": "Full name of the passenger"
+                    },
+                    "has_bicycle": {
+                      "type": "boolean",
+                      "description": "Whether the passenger has a bicycle"
+                    },
+                    "has_dog": {
+                      "type": "boolean",
+                      "description": "Whether the passenger has a dog"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "trip_id",
+                    "passenger_name",
+                    "has_bicycle",
+                    "has_dog"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-speakeasy-name-override": "createBooking"
+      }
+    },
+    "/bookings/{bookingId}": {
+      "get": {
+        "operationId": "getBooking",
+        "summary": "Get a booking",
+        "description": "Returns the details of a specific booking.",
+        "tags": [
+          "Bookings"
+        ],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "bookingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The ID of the booking"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "Unique booking ID"
+                    },
+                    "trip_id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "ID of the booked trip"
+                    },
+                    "passenger_name": {
+                      "type": "string",
+                      "description": "Full name of the passenger"
+                    },
+                    "has_bicycle": {
+                      "type": "boolean",
+                      "description": "Whether the passenger has a bicycle"
+                    },
+                    "has_dog": {
+                      "type": "boolean",
+                      "description": "Whether the passenger has a dog"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "trip_id",
+                    "passenger_name",
+                    "has_bicycle",
+                    "has_dog"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/error"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteBooking",
+        "summary": "Delete a booking",
+        "description": "Deletes a booking by ID.",
+        "tags": [
+          "Bookings"
+        ],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "bookingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The ID of the booking"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/error"
+          }
+        }
+      }
+    },
+    "/bookings/{bookingId}/payment": {
+      "post": {
+        "operationId": "createBookingPayment",
+        "summary": "Pay for a booking",
+        "description": "Pays for a booking by submitting a card or bank account payment source.",
+        "tags": [
+          "Payments"
+        ],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "amount": {
+                    "type": "number",
+                    "description": "Amount to pay in the specified currency"
+                  },
+                  "currency": {
+                    "type": "string",
+                    "description": "ISO 4217 currency code (e.g. EUR)"
+                  },
+                  "source": {
+                    "type": "object",
+                    "properties": {
+                      "object": {
+                        "type": "string",
+                        "enum": [
+                          "card",
+                          "bank_account"
+                        ],
+                        "description": "Payment source type"
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "Cardholder or account holder name"
+                      },
+                      "number": {
+                        "type": "string",
+                        "description": "Card or bank account number"
+                      }
+                    },
+                    "required": [
+                      "object",
+                      "name",
+                      "number"
+                    ],
+                    "additionalProperties": false,
+                    "description": "Payment source details"
+                  }
+                },
+                "required": [
+                  "amount",
+                  "currency",
+                  "source"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "bookingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The ID of the booking"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "Unique payment ID"
+                    },
+                    "amount": {
+                      "type": "number",
+                      "description": "Amount paid"
+                    },
+                    "currency": {
+                      "type": "string",
+                      "description": "Currency of the payment"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "pending",
+                        "succeeded",
+                        "failed"
+                      ],
+                      "description": "Payment status"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "amount",
+                    "currency",
+                    "status"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-speakeasy-name-override": "pay"
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "OAuth2": {
+        "type": "oauth2",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://example.com/oauth/authorize",
+            "tokenUrl": "https://example.com/oauth/token",
+            "scopes": {
+              "read": "Read access",
+              "write": "Write access"
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "error": {
+        "description": "Error response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "string"
+                },
+                "issues": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "message"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "message",
+                "code"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      }
+    },
+    "schemas": {}
+  },
+  "tags": [
+    {
+      "name": "Stations",
+      "description": "Find and filter train stations across Europe, including location and local timezone."
+    },
+    {
+      "name": "Trips",
+      "description": "Timetables and routes for train trips between stations, including pricing and availability."
+    },
+    {
+      "name": "Bookings",
+      "description": "Create and manage bookings for train trips, including passenger details and optional extras."
+    },
+    {
+      "name": "Payments",
+      "description": "Pay for bookings using a card or bank account, and view payment status and history."
+    }
+  ],
+  "security": [
+    {
+      "OAuth2": [
+        "read"
+      ]
+    }
+  ],
+  "x-speakeasy-retries": {
+    "strategy": "backoff",
+    "backoff": {
+      "initialInterval": 500,
+      "maxInterval": 60000,
+      "maxElapsedTime": 3600000,
+      "exponent": 1.5
+    },
+    "statusCodes": [
+      "5XX"
+    ],
+    "retryConnectionErrors": true
+  }
+}
