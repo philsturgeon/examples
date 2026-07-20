@@ -29,14 +29,14 @@ To generate an SDK, you'll also need the Speakeasy CLI installed, or use the Spe
 ```json
 {
   "dependencies": {
-    "@trpc/client": "^10.40.0",
-    "@trpc/server": "^10.40.0",
-    "express": "^4.18.2",
-    "trpc-openapi": "^1.2.0",
-    "zod": "^3.22.4"
+    "@trpc/client": "^11.18.0",
+    "@trpc/server": "^11.18.0",
+    "express": "^5.2.1",
+    "trpc-to-openapi": "^3.3.0",
+    "zod": "^4.0.0"
   },
   "devDependencies": {
-    "@types/express": "^4.17.18",
+    "@types/express": "^5.0.6",
     "ts-node": "^10.9.1",
     "typescript": "^5.2.2"
   }
@@ -80,24 +80,6 @@ The API will be available at `http://localhost:3000`.
 ### Working with the OpenAPI specification
 
 To generate an OpenAPI spec in JSON format, run:
-
-```bash
-npm run generate-openapi
-```
-
-Additionally, you can generate both the specification file and a TypeScript SDK for your API using:
-
-```bash
-npm run generate-openapi-and-sdk
-```
-
-## License
-
-This project is licensed under the terms of the Apache 2.0 license.
-
-### Working with the OpenAPI specification
-
-To generate an OpenAPI spec in YAML format, run:
 
 ```bash
 npm run generate-openapi

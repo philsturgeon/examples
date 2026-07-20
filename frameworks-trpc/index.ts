@@ -1,6 +1,6 @@
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import express from "express";
-import { createOpenApiExpressMiddleware } from "trpc-openapi";
+import { createOpenApiExpressMiddleware } from "trpc-to-openapi";
 
 import { appRouter } from "./router";
 

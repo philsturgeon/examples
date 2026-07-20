@@ -1,5 +1,5 @@
 import { initTRPC, TRPCError } from "@trpc/server";
-import { OpenApiMeta } from "trpc-openapi";
+import { OpenApiMeta } from "trpc-to-openapi";
 import { z } from "zod";
 
 import {
@@ -24,33 +24,31 @@ export const appRouter = t.router({
         description:
           "Returns a paginated and searchable list of all train stations.",
         tags: ["Stations"],
-        example: {
-          request: { search: "Berlin", country: "DE" },
-          response: {
-            data: [
-              {
-                id: "efdbb9d1-02c2-4bc3-afb7-6788d8782b1e",
-                name: "Berlin Hauptbahnhof",
-                address: "Invalidenstrasse 10557 Berlin, Germany",
-                country_code: "DE",
-                timezone: "Europe/Berlin",
-              },
-            ],
-          },
-        },
       },
     })
     .input(
       z.object({
-        page: z.number().optional().describe("Page number to return"),
+        page: z
+          .number()
+          .meta({
+            description: "Page number to return",
+            example: 1,
+          })
+          .optional(),
         search: z
           .string()
-          .optional()
-          .describe("Filter stations by name or address"),
+          .meta({
+            description: "Filter stations by name or address",
+            example: "Berlin",
+          })
+          .optional(),
         country: z
           .string()
-          .optional()
-          .describe("Filter stations by ISO 3166-1 alpha-2 country code"),
+          .meta({
+            description: "Filter stations by ISO 3166-1 alpha-2 country code",
+            example: "DE",
+          })
+          .optional(),
       })
     )
     .output(z.object({ data: z.array(StationSchema) }))
@@ -68,43 +66,36 @@ export const appRouter = t.router({
         description:
           "Returns a list of available train trips between two stations on a given date.",
         tags: ["Trips"],
-        example: {
-          request: {
-            origin: "efdbb9d1-02c2-4bc3-afb7-6788d8782b1e",
-            destination: "b2e783e1-c824-4d63-b37a-d8d698862f1d",
-            date: "2024-02-01",
-          },
-          response: {
-            data: [
-              {
-                id: "ea399ba1-6d95-433f-92d1-83f67b775594",
-                origin: "efdbb9d1-02c2-4bc3-afb7-6788d8782b1e",
-                destination: "b2e783e1-c824-4d63-b37a-d8d698862f1d",
-                departure_time: "2024-02-01T10:00:00Z",
-                arrival_time: "2024-02-01T16:00:00Z",
-                price: 50,
-                operator: "Deutsche Bahn",
-                bicycles_allowed: true,
-                dogs_allowed: true,
-              },
-            ],
-          },
-        },
       },
     })
     .input(
       z.object({
-        origin: z.string().uuid().describe("ID of the origin station"),
-        destination: z.string().uuid().describe("ID of the destination station"),
-        date: z.string().describe("Travel date in YYYY-MM-DD format"),
+        origin: z.string().uuid().meta({
+          description: "ID of the origin station",
+          example: "efdbb9d1-02c2-4bc3-afb7-6788d8782b1e",
+        }),
+        destination: z.string().uuid().meta({
+          description: "ID of the destination station",
+          example: "b2e783e1-c824-4d63-b37a-d8d698862f1d",
+        }),
+        date: z.string().meta({
+          description: "Travel date in YYYY-MM-DD format",
+          example: "2024-02-01",
+        }),
         bicycles: z
           .boolean()
-          .optional()
-          .describe("Only return trips that allow bicycles"),
+          .meta({
+            description: "Only return trips that allow bicycles",
+            example: true,
+          })
+          .optional(),
         dogs: z
           .boolean()
-          .optional()
-          .describe("Only return trips that allow dogs"),
+          .meta({
+            description: "Only return trips that allow dogs",
+            example: true,
+          })
+          .optional(),
       })
     )
     .output(z.object({ data: z.array(TripSchema) }))
@@ -127,7 +118,13 @@ export const appRouter = t.router({
     })
     .input(
       z.object({
-        page: z.number().optional().describe("Page number to return"),
+        page: z
+          .number()
+          .meta({
+            description: "Page number to return",
+            example: 1,
+          })
+          .optional(),
       })
     )
     .output(z.object({ data: z.array(BookingSchema) }))
@@ -167,14 +164,20 @@ export const appRouter = t.router({
     })
     .input(
       z.object({
-        bookingId: z.string().uuid().describe("The ID of the booking"),
+        bookingId: z.string().uuid().meta({
+          description: "The ID of the booking",
+          example: "1725ff48-ab45-4bb5-9d02-88745177dedb",
+        }),
       })
     )
     .output(BookingSchema)
     .query(async ({ input }) => {
       const booking = await db.booking.findById(input.bookingId);
       if (!booking)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Booking not found" });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Booking not found",
+        });
       return booking;
     }),
 
@@ -191,14 +194,20 @@ export const appRouter = t.router({
     })
     .input(
       z.object({
-        bookingId: z.string().uuid().describe("The ID of the booking"),
+        bookingId: z.string().uuid().meta({
+          description: "The ID of the booking",
+          example: "1725ff48-ab45-4bb5-9d02-88745177dedb",
+        }),
       })
     )
     .output(z.object({ message: z.string() }))
     .mutation(async ({ input }) => {
       const booking = await db.booking.findById(input.bookingId);
       if (!booking)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Booking not found" });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Booking not found",
+        });
       await db.booking.delete(input.bookingId);
       return { message: "Booking deleted" };
     }),
@@ -217,7 +226,10 @@ export const appRouter = t.router({
     })
     .input(
       BookingPaymentInputSchema.extend({
-        bookingId: z.string().uuid().describe("The ID of the booking"),
+        bookingId: z.string().uuid().meta({
+          description: "The ID of the booking",
+          example: "1725ff48-ab45-4bb5-9d02-88745177dedb",
+        }),
       })
     )
     .output(BookingPaymentSchema)
@@ -225,7 +237,10 @@ export const appRouter = t.router({
       const { bookingId, ...paymentInput } = input;
       const booking = await db.booking.findById(bookingId);
       if (!booking)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Booking not found" });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Booking not found",
+        });
       const payment = await db.payment.create(bookingId, paymentInput);
       return payment;
     }),

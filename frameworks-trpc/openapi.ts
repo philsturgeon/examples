@@ -1,6 +1,5 @@
-import { generateOpenApiDocument } from "trpc-openapi";
+import { generateOpenApiDocument } from "trpc-to-openapi";
 
-import { ExtendedDocument, ExtendedOperationObject } from "./extended-types";
 import { appRouter } from "./router";
 
 const openApiDocument = generateOpenApiDocument(appRouter, {
@@ -9,6 +8,24 @@ const openApiDocument = generateOpenApiDocument(appRouter, {
   version: "1.2.1",
   baseUrl: "https://try.microcks.io/rest/Train+Travel+API/1.0.0",
   tags: ["Stations", "Trips", "Bookings", "Payments"],
+  // Setting this here (rather than on openApiDocument.components afterwards)
+  // ensures protected procedures reference "OAuth2" instead of the default
+  // "Authorization" security scheme name.
+  securitySchemes: {
+    OAuth2: {
+      type: "oauth2",
+      flows: {
+        authorizationCode: {
+          authorizationUrl: "https://example.com/oauth/authorize",
+          tokenUrl: "https://example.com/oauth/token",
+          scopes: {
+            read: "Read access",
+            write: "Write access",
+          },
+        },
+      },
+    },
+  },
 });
 
 // Override servers
@@ -24,12 +41,12 @@ openApiDocument.servers = [
 ];
 
 // Add contact and license to info
-(openApiDocument.info as any).contact = {
+openApiDocument.info.contact = {
   name: "Train Support",
   url: "https://example.com/support",
   email: "support@example.com",
 };
-(openApiDocument.info as any).license = {
+openApiDocument.info.license = {
   name: "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International",
   url: "https://creativecommons.org/licenses/by-nc-sa/4.0/",
 };
@@ -58,32 +75,11 @@ openApiDocument.tags = [
   },
 ];
 
-// Add OAuth2 security scheme
-openApiDocument.components = {
-  ...openApiDocument.components,
-  schemas: openApiDocument?.components?.schemas || {},
-  securitySchemes: {
-    OAuth2: {
-      type: "oauth2",
-      flows: {
-        authorizationCode: {
-          authorizationUrl: "https://example.com/oauth/authorize",
-          tokenUrl: "https://example.com/oauth/token",
-          scopes: {
-            read: "Read access",
-            write: "Write access",
-          },
-        },
-      },
-    },
-  },
-};
-
 // Set global security
 openApiDocument.security = [{ OAuth2: ["read"] }];
 
 // Add global x-speakeasy-retries
-(openApiDocument as ExtendedDocument)["x-speakeasy-retries"] = {
+openApiDocument["x-speakeasy-retries"] = {
   strategy: "backoff",
   backoff: {
     initialInterval: 500,
@@ -98,10 +94,8 @@ openApiDocument.security = [{ OAuth2: ["read"] }];
 // Add x-speakeasy-name-override to select operations
 const searchTripsOp = openApiDocument.paths?.["/trips"]?.get;
 if (searchTripsOp) {
-  (searchTripsOp as ExtendedOperationObject)[
-    "x-speakeasy-name-override"
-  ] = "searchTrips";
-  (searchTripsOp as ExtendedOperationObject)["x-speakeasy-retries"] = {
+  searchTripsOp["x-speakeasy-name-override"] = "searchTrips";
+  searchTripsOp["x-speakeasy-retries"] = {
     strategy: "backoff",
     backoff: {
       initialInterval: 500,
@@ -116,14 +110,12 @@ if (searchTripsOp) {
 
 const createBookingOp = openApiDocument.paths?.["/bookings"]?.post;
 if (createBookingOp) {
-  (createBookingOp as ExtendedOperationObject)[
-    "x-speakeasy-name-override"
-  ] = "createBooking";
+  createBookingOp["x-speakeasy-name-override"] = "createBooking";
 }
 
 const payOp = openApiDocument.paths?.["/bookings/{bookingId}/payment"]?.post;
 if (payOp) {
-  (payOp as ExtendedOperationObject)["x-speakeasy-name-override"] = "pay";
+  payOp["x-speakeasy-name-override"] = "pay";
 }
 
 export { openApiDocument };
