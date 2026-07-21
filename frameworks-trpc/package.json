@@ -4,9 +4,10 @@
   "description": "",
   "main": "server/index.js",
   "scripts": {
-    "start": "ts-node server/index.ts",
-    "generate-openapi": "ts-node server/generateOpenApi.ts > openapi-spec.json",
-    "generate-openapi-and-sdk": "ts-node server/generateOpenApi.ts > openapi-spec.json && speakeasy generate sdk --schema openapi-spec.json --lang typescript --out ./sdk",
+    "start": "tsx server/index.ts",
+    "generate-openapi": "tsx server/generateOpenApi.ts > openapi-spec.json",
+    "preview-openapi": "npm run generate-openapi && npx @scalar/cli document serve openapi-spec.json",
+    "generate-openapi-and-sdk": "npm run generate-openapi && speakeasy generate sdk --schema openapi-spec.json --lang typescript --out ./sdk",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Phil Sturgeon <phil@apisyouwonthate.com>",
@@ -20,7 +21,7 @@
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
-    "ts-node": "^10.9.1",
+    "tsx": "^4.23.1",
     "typescript": "^5.2.2"
   }
 }

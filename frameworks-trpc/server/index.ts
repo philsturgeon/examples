@@ -9,4 +9,4 @@ const app = express();
 app.use("/api/trpc", createExpressMiddleware({ router: appRouter }));
 app.use("/api", createOpenApiExpressMiddleware({ router: appRouter }));
 
-app.listen(3000);
+app.listen(3123);

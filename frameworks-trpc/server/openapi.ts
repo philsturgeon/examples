@@ -6,7 +6,7 @@ const openApiDocument = generateOpenApiDocument(appRouter, {
   title: "Train Travel API",
   description: "API for finding and booking train trips across Europe.",
   version: "1.2.1",
-  baseUrl: "https://try.microcks.io/rest/Train+Travel+API/1.0.0",
+  baseUrl: "http://localhost:3123/api",
   tags: ["Stations", "Trips", "Bookings", "Payments"],
   // Setting this here (rather than on openApiDocument.components afterwards)
   // ensures protected procedures reference "OAuth2" instead of the default
@@ -31,11 +31,11 @@ const openApiDocument = generateOpenApiDocument(appRouter, {
 // Override servers
 openApiDocument.servers = [
   {
-    url: "https://try.microcks.io/rest/Train+Travel+API/1.0.0",
-    description: "Mock Server",
+    url: "http://localhost:3123/api",
+    description: "Local Development",
   },
   {
-    url: "https://api.example.com",
+    url: "https://api.example.com/api",
     description: "Production",
   },
 ];

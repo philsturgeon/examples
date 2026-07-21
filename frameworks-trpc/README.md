@@ -44,7 +44,7 @@ To generate an SDK, you'll also need the Speakeasy CLI installed, or use the Spe
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
-    "ts-node": "^10.9.1",
+    "tsx": "^4.23.1",
     "typescript": "^5.2.2"
   }
 }

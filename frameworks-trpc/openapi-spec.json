@@ -16,11 +16,11 @@
   },
   "servers": [
     {
-      "url": "https://try.microcks.io/rest/Train+Travel+API/1.0.0",
-      "description": "Mock Server"
+      "url": "http://localhost:3123/api",
+      "description": "Local Development"
     },
     {
-      "url": "https://api.example.com",
+      "url": "https://api.example.com/api",
       "description": "Production"
     }
   ],
