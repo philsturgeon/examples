@@ -2,10 +2,11 @@
   "name": "speakeasy-example-trpc",
   "version": "2.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server/index.js",
   "scripts": {
-    "generate-openapi": "ts-node generateOpenApi.ts > openapi-spec.json",
-    "generate-openapi-and-sdk": "ts-node generateOpenApi.ts > openapi-spec.json && speakeasy generate sdk --schema openapi-spec.json --lang typescript --out ./sdk",
+    "start": "ts-node server/index.ts",
+    "generate-openapi": "ts-node server/generateOpenApi.ts > openapi-spec.json",
+    "generate-openapi-and-sdk": "ts-node server/generateOpenApi.ts > openapi-spec.json && speakeasy generate sdk --schema openapi-spec.json --lang typescript --out ./sdk",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Phil Sturgeon <phil@apisyouwonthate.com>",

@@ -3,13 +3,13 @@ import { OpenApiMeta } from "trpc-to-openapi";
 import { z } from "zod";
 
 import {
-  StationSchema,
-  TripSchema,
   BookingInputSchema,
-  BookingSchema,
   BookingPaymentInputSchema,
   BookingPaymentSchema,
-} from "./models";
+  BookingSchema,
+  StationSchema,
+  TripSchema,
+} from "../shared/models";
 import { db } from "./db";
 
 const t = initTRPC.meta<OpenApiMeta>().create();

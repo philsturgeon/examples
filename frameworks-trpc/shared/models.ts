@@ -159,7 +159,7 @@ export const BookingPaymentSchema = z.object({
     description: "Currency of the payment",
     example: "EUR",
   }),
-  status: z.enum(["pending", "succeeded", "failed"]).meta({
+  status: z.enum(["succeeded", "failed", "pending"]).meta({
     description: "Payment status",
     example: "succeeded",
   }),

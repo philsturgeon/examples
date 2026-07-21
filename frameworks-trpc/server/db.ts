@@ -1,6 +1,10 @@
-import type { Station, Trip, Booking, BookingPayment } from "./models";
 import { z } from "zod";
-import { BookingInputSchema, BookingPaymentInputSchema } from "./models";
+
+import type { Booking, BookingPayment, Station, Trip } from "../shared/models";
+import {
+  BookingInputSchema,
+  BookingPaymentInputSchema,
+} from "../shared/models";
 
 const STATIONS: Station[] = [
   {
@@ -74,29 +78,29 @@ export const db = {
       let data = [...STATIONS];
       if (filter.search)
         data = data.filter(
-          (s) =>
-            s.name.includes(filter.search!) ||
-            s.address.includes(filter.search!)
+          (station) =>
+            station.name.includes(filter.search!) ||
+            station.address.includes(filter.search!)
         );
       if (filter.country)
-        data = data.filter((s) => s.country_code === filter.country);
+        data = data.filter((station) => station.country_code === filter.country);
       return data;
     },
   },
   trip: {
     findAll: async (filter: TripFilter) => {
       let data = TRIPS.filter(
-        (t) =>
-          t.origin === filter.origin && t.destination === filter.destination
+        (trip) =>
+          trip.origin === filter.origin && trip.destination === filter.destination
       );
-      if (filter.bicycles) data = data.filter((t) => t.bicycles_allowed);
-      if (filter.dogs) data = data.filter((t) => t.dogs_allowed);
+      if (filter.bicycles) data = data.filter((trip) => trip.bicycles_allowed);
+      if (filter.dogs) data = data.filter((trip) => trip.dogs_allowed);
       return data;
     },
   },
   booking: {
     findAll: async () => [...BOOKINGS],
-    findById: async (id: string) => BOOKINGS.find((b) => b.id === id),
+    findById: async (id: string) => BOOKINGS.find((booking) => booking.id === id),
     create: async (input: z.infer<typeof BookingInputSchema>): Promise<Booking> => {
       const booking: Booking = {
         id: crypto.randomUUID(),
@@ -109,7 +113,7 @@ export const db = {
       return booking;
     },
     delete: async (id: string) => {
-      const idx = BOOKINGS.findIndex((b) => b.id === id);
+      const idx = BOOKINGS.findIndex((booking) => booking.id === id);
       if (idx !== -1) BOOKINGS.splice(idx, 1);
     },
   },
