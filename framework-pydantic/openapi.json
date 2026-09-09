@@ -1,0 +1,338 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Train Travel API",
+    "description": "A sample API for stations, trips, and bookings.",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/stations": {
+      "get": {
+        "tags": [
+          "Stations"
+        ],
+        "summary": "List Stations",
+        "operationId": "list_stations_stations_get",
+        "parameters": [
+          {
+            "name": "country",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Filter stations by ISO 3166-1 alpha-2 country code.",
+              "examples": [
+                "DE"
+              ],
+              "title": "Country"
+            },
+            "description": "Filter stations by ISO 3166-1 alpha-2 country code."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Station"
+                  },
+                  "title": "Response List Stations Stations Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trips": {
+      "get": {
+        "tags": [
+          "Trips"
+        ],
+        "summary": "List Trips",
+        "operationId": "list_trips_trips_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Trip"
+                  },
+                  "type": "array",
+                  "title": "Response List Trips Trips Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bookings": {
+      "post": {
+        "tags": [
+          "Bookings"
+        ],
+        "summary": "Create Booking",
+        "operationId": "create_booking_bookings_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Booking"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Booking"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Booking": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "Unique booking ID.",
+            "examples": [
+              "booking_123"
+            ]
+          },
+          "trip_id": {
+            "type": "string",
+            "title": "Trip Id",
+            "description": "Trip ID for the travel segment.",
+            "examples": [
+              "trip_001"
+            ]
+          },
+          "passenger_name": {
+            "type": "string",
+            "title": "Passenger Name",
+            "description": "Passenger name on the booking.",
+            "examples": [
+              "Ada Lovelace"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "confirmed",
+              "pending",
+              "cancelled"
+            ],
+            "title": "Status",
+            "description": "Booking status.",
+            "default": "confirmed",
+            "examples": [
+              "confirmed"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "trip_id",
+          "passenger_name"
+        ],
+        "title": "Booking"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Station": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "Unique station ID.",
+            "examples": [
+              "efdbb9d1-02c2-4bc3-afb7-6788d8782b1e"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Station name.",
+            "examples": [
+              "Berlin Hauptbahnhof"
+            ]
+          },
+          "country_code": {
+            "type": "string",
+            "title": "Country Code",
+            "description": "ISO 3166-1 alpha-2 country code.",
+            "examples": [
+              "DE"
+            ]
+          },
+          "timezone": {
+            "type": "string",
+            "title": "Timezone",
+            "description": "IANA timezone of the station.",
+            "examples": [
+              "Europe/Berlin"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "country_code",
+          "timezone"
+        ],
+        "title": "Station"
+      },
+      "Trip": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "Unique trip ID.",
+            "examples": [
+              "trip_001"
+            ]
+          },
+          "origin": {
+            "type": "string",
+            "title": "Origin",
+            "description": "Origin station ID.",
+            "examples": [
+              "efdbb9d1-02c2-4bc3-afb7-6788d8782b1e"
+            ]
+          },
+          "destination": {
+            "type": "string",
+            "title": "Destination",
+            "description": "Destination station ID.",
+            "examples": [
+              "b2e783e1-c824-4d63-b37a-d8d698862f1d"
+            ]
+          },
+          "departure_time": {
+            "type": "string",
+            "title": "Departure Time",
+            "description": "Departure time in ISO 8601 format.",
+            "examples": [
+              "2026-08-24T08:15:00Z"
+            ]
+          },
+          "arrival_time": {
+            "type": "string",
+            "title": "Arrival Time",
+            "description": "Arrival time in ISO 8601 format.",
+            "examples": [
+              "2026-08-24T10:05:00Z"
+            ]
+          },
+          "price": {
+            "type": "number",
+            "title": "Price",
+            "description": "Trip price in EUR.",
+            "examples": [
+              89.0
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "origin",
+          "destination",
+          "departure_time",
+          "arrival_time",
+          "price"
+        ],
+        "title": "Trip"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "type": [
+                "string",
+                "integer"
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
