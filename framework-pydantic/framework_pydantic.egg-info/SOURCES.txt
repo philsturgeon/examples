@@ -1,0 +1,9 @@
+README.md
+generate_openapi.py
+main.py
+pyproject.toml
+framework_pydantic.egg-info/PKG-INFO
+framework_pydantic.egg-info/SOURCES.txt
+framework_pydantic.egg-info/dependency_links.txt
+framework_pydantic.egg-info/requires.txt
+framework_pydantic.egg-info/top_level.txt
