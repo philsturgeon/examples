@@ -20,10 +20,7 @@ pip install -e .
 python main.py
 ```
 
-Then open:
-
-- http://localhost:8000/docs
-- http://localhost:8000/openapi.json
+Then open http://localhost:8000/openapi.json.
 
 ## Generate the OpenAPI document
 
@@ -32,3 +29,12 @@ python generate_openapi.py
 ```
 
 This writes both `openapi.json` and `openapi.yaml`.
+
+## Preview the OpenAPI document
+
+Generate and preview the latest OpenAPI document with the Scalar CLI:
+
+```bash
+python generate_openapi.py
+npx @scalar/cli document serve openapi.yaml
+```

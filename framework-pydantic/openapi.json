@@ -19,9 +19,13 @@
             "in": "query",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
               ],
               "description": "Filter stations by ISO 3166-1 alpha-2 country code.",
               "examples": [
@@ -301,9 +305,13 @@
         "properties": {
           "loc": {
             "items": {
-              "type": [
-                "string",
-                "integer"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
               ]
             },
             "type": "array",
