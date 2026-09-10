@@ -994,10 +994,10 @@ paths:
                     - nok
                     - sek
                 promo_code:
-                  anyOf:
-                    - example: SUMMER20
-                      type: string
-                    - type: 'null'
+                  example: SUMMER20
+                  type:
+                    - string
+                    - 'null'
                 source:
                   anyOf:
                     - type: object
@@ -1058,11 +1058,10 @@ paths:
                           example: '000123'
                           type: string
                         account_type:
-                          anyOf:
-                            - const: individual
-                              type: string
-                            - const: company
-                              type: string
+                          type: string
+                          enum:
+                            - individual
+                            - company
                         bank_name:
                           example: Starling Bank
                           type: string
@@ -1092,10 +1091,10 @@ paths:
                     - nok
                     - sek
                 promo_code:
-                  anyOf:
-                    - example: SUMMER20
-                      type: string
-                    - type: 'null'
+                  example: SUMMER20
+                  type:
+                    - string
+                    - 'null'
                 source:
                   anyOf:
                     - type: object
@@ -1156,11 +1155,10 @@ paths:
                           example: '000123'
                           type: string
                         account_type:
-                          anyOf:
-                            - const: individual
-                              type: string
-                            - const: company
-                              type: string
+                          type: string
+                          enum:
+                            - individual
+                            - company
                         bank_name:
                           example: Starling Bank
                           type: string
@@ -1190,10 +1188,10 @@ paths:
                     - nok
                     - sek
                 promo_code:
-                  anyOf:
-                    - example: SUMMER20
-                      type: string
-                    - type: 'null'
+                  example: SUMMER20
+                  type:
+                    - string
+                    - 'null'
                 source:
                   anyOf:
                     - type: object
@@ -1254,11 +1252,10 @@ paths:
                           example: '000123'
                           type: string
                         account_type:
-                          anyOf:
-                            - const: individual
-                              type: string
-                            - const: company
-                              type: string
+                          type: string
+                          enum:
+                            - individual
+                            - company
                         bank_name:
                           example: Starling Bank
                           type: string
