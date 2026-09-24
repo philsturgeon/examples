@@ -1,472 +1,240 @@
-"""APItizing Burgers API: an example API to manage burgers and orders in a restaurant
-
-This example API demonstrates Speakeasy's recommended practices for generating clear
-OpenAPI specifications.
-"""
+"""Train Travel API example implemented with FastAPI."""
 
 from datetime import datetime
 from enum import Enum
-from typing import List, Annotated
+from typing import List, Optional
+from uuid import UUID, uuid4
 
-from fastapi import Depends, FastAPI, HTTPException, Path, status
+from fastapi import FastAPI, HTTPException, Query, status
 from fastapi.openapi.utils import get_openapi
-from fastapi.responses import JSONResponse
-from fastapi.routing import APIRoute
-from fastapi.security import APIKeyHeader
-
-from pydantic import BaseModel, Field, conlist
-
+from pydantic import BaseModel, Field
 from scalar_fastapi import get_scalar_api_reference
 
-API_KEY = "your-apitizing-api-key"
 
-header_scheme = APIKeyHeader(
-    name=API_KEY,
-    auto_error=True,
-    description="API Key for the Burger listing API. API Key should be sent as a header, with the value 'your-apitizing-api-key'",
-    scheme_name="api_key",
-)
-
-
-class BurgerCreate(BaseModel):
-    """Fields to create a burger"""
-
-    name: str = Field(
-        description="The name of the burger",
-        examples=["Cheeseburger", "Hamburger", "Veggie Burger"],
-        min_length=1,
-        max_length=50,
-    )
-    description: str = Field(
-        "",
-        description="The description of the burger",
-        examples=["A classic cheeseburger", "Veggie burger with avocado"],
-        max_length=255,
-    )
+class Station(BaseModel):
+    id: UUID
+    name: str
+    address: str
+    country_code: str
+    timezone: str
 
 
-class BurgerUpdate(BaseModel):
-    """Fields to update a burger"""
-
-    name: str = Field(
-        None,
-        description="The name of the burger",
-        examples=["Cheeseburger", "Hamburger", "Veggie Burger", None],
-        min_length=1,
-        max_length=50,
-    )
-    description: str = Field(
-        None,
-        description="The description of the burger",
-        examples=["A classic cheeseburger", "Veggie burger with avocado", None],
-        max_length=255,
-    )
+class Trip(BaseModel):
+    id: UUID
+    origin: UUID
+    destination: UUID
+    departure_time: datetime
+    arrival_time: datetime
+    price: float
+    operator: str
+    bicycles_allowed: bool
+    dogs_allowed: bool
 
 
-class BurgerData(BaseModel):
-    """A burger in the database"""
-
-    id: int = Field(gte=0, description="The id of the burger", examples=[1, 2, 3])
-    name: str = Field(
-        description="The name of the burger",
-        examples=["Cheeseburger", "Hamburger", "Veggie Burger"],
-        min_length=1,
-        max_length=50,
-    )
-    description: str = Field(
-        "",
-        description="The description of the burger",
-        examples=["A classic cheeseburger", "Veggie burger with avocado"],
-        max_length=255,
-    )
+class Booking(BaseModel):
+    id: UUID = Field(default_factory=uuid4)
+    trip_id: UUID
+    passenger_name: str
+    has_bicycle: bool = False
+    has_dog: bool = False
 
 
-class BurgerOutput(BurgerData):
-    """A burger to be returned"""
+class PaymentStatus(str, Enum):
+    pending = "pending"
+    succeeded = "succeeded"
+    failed = "failed"
 
 
-class OrderStatus(str, Enum):
-    """Status of the order"""
-
-    CREATED = "CREATED"
-    PREPARING = "PREPARING"
-    READY = "READY"
-    DELIVERED = "DELIVERED"
-    CANCELLED = "CANCELLED"
-
-
-class OrderCreate(BaseModel):
-    """Fields to create an order"""
-
-    burger_ids: conlist(int, min_length=1, max_length=255) = Field(
-        description="List of burger ids in the order",
-        examples=[[1, 2], [3], [1, 3]],
-    )
-    table: int = Field(
-        gt=0,
-        description="Table number for the order",
-        examples=[1, 2, 3],
-    )
-    note: str = Field(
-        None,
-        description="Note for the order",
-        examples=["No onions", "Extra ketchup"],
-    )
+class CardSource(BaseModel):
+    object: str = "card"
+    name: str
+    number: str
+    cvc: str = Field(min_length=3, max_length=4)
+    exp_month: int
+    exp_year: int
+    address_country: str
+    address_post_code: Optional[str] = None
 
 
-class OrderData(BaseModel):
-    """An order in the database"""
-
-    id: int = Field(gte=0, description="The id of the order", examples=[1, 2, 3])
-    burger_ids: conlist(int, min_length=1, max_length=255) = Field(
-        description="List of burger ids in the order",
-        examples=[[1, 2], [3], [1, 3]],
-    )
-    time: datetime = Field(
-        description="Time of the order",
-        examples=["2021-01-01T12:00:00"],
-    )
-    table: int = Field(
-        gt=0,
-        description="Table number for the order",
-        examples=[1, 2, 3],
-    )
-    status: OrderStatus = Field(
-        description="Status of the order",
-        examples=[s.value for s in OrderStatus],
-    )
-    note: str = Field(
-        None,
-        description="Note for the order",
-        examples=["No onions", "Extra ketchup"],
-    )
+class BankAccountSource(BaseModel):
+    object: str = "bank_account"
+    name: str
+    number: str
+    sort_code: Optional[str] = None
+    account_type: str
+    bank_name: str
+    country: str
 
 
-class OrderUpdate(BaseModel):
-    """Fields to update an order"""
-
-    burger_ids: conlist(int, min_length=1, max_length=255) = Field(
-        None,
-        description="List of burger ids in the order",
-        examples=[[1, 2], [3], [1, 3]],
-    )
-    table: int = Field(
-        None,
-        gt=0,
-        description="Table number for the order",
-        examples=[1, 2, 3],
-    )
-    status: OrderStatus = Field(
-        None,
-        description="Status of the order",
-        examples=[s.value for s in OrderStatus],
-    )
-    note: str = Field(
-        None,
-        description="Note for the order",
-        examples=["No onions", "Extra ketchup"],
-    )
+class BookingPayment(BaseModel):
+    id: Optional[UUID] = None
+    amount: float = Field(gt=0)
+    currency: str
+    source: CardSource | BankAccountSource
+    status: Optional[PaymentStatus] = None
 
 
-class OrderOutput(OrderData):
-    """An order to be returned"""
+class CollectionLinks(BaseModel):
+    self: str
+    next: Optional[str] = None
+    prev: Optional[str] = None
 
 
-class ResponseMessage(BaseModel):
-    """A response message"""
-
-    message: str = Field(description="The response message")
-
-
-OPENAPI_RESPONSE_BURGER_NOT_FOUND = {
-    "model": ResponseMessage,
-    "description": "Burger not found",
-}
+class StationCollection(BaseModel):
+    data: List[Station]
+    links: CollectionLinks
 
 
-OPENAPI_RESPONSE_ORDER_NOT_FOUND = {
-    "model": ResponseMessage,
-    "description": "Order not found",
-}
+class TripWithLinks(Trip):
+    links: dict[str, str]
 
 
-def response_burger_not_found(burger_id: int):
-    """Response for burger not found"""
-
-    return JSONResponse(
-        status_code=404,
-        content=f"Burger with id {burger_id} does not exist",
-    )
+class TripCollection(BaseModel):
+    data: List[TripWithLinks]
+    links: CollectionLinks
 
 
-def response_order_not_found(order_id: int):
-    """Response for order not found"""
+class BookingWithLinks(Booking):
+    links: dict[str, str]
 
-    return JSONResponse(
-        status_code=404,
-        content=f"Order with id {order_id} does not exist",
-    )
+
+class BookingCollection(BaseModel):
+    data: List[BookingWithLinks]
+    links: CollectionLinks
+
+
+class PaymentWithLinks(BookingPayment):
+    links: dict[str, str]
 
 
 tags_metadata = [
-    {
-        "name": "burger",
-        "description": "Operations related to burgers",
-        "externalDocs": {
-            "description": "Burger external docs",
-            "url": "https://en.wikipedia.org/wiki/Hamburger",
-        },
-    },
-    {
-        "name": "order",
-        "description": "Operations related to orders",
-    },
+    {"name": "Stations", "description": "Find and filter train stations across Europe."},
+    {"name": "Trips", "description": "Timetables and routes for train trips between stations."},
+    {"name": "Bookings", "description": "Create and manage bookings for train trips."},
+    {"name": "Payments", "description": "Pay for bookings and view payment status."},
 ]
 
-
-def convert_snake_case_to_camel_case(string: str) -> str:
-    """Convert snake case to camel case"""
-
-    words = string.split("_")
-    return words[0] + "".join(word.title() for word in words[1:])
-
-
-def custom_generate_unique_id_function(route: APIRoute) -> str:
-    """Custom function to generate unique id for each endpoint"""
-
-    return convert_snake_case_to_camel_case(route.name)
-
-
 app = FastAPI(
+    title="Train Travel API",
+    summary="Find and book train trips across Europe",
+    description="API for finding and booking train trips across Europe.",
+    version="1.2.1",
     servers=[
-        {"url": "http://127.0.0.1:8000", "description": "Local server"},
+        {"url": "https://try.microcks.io/rest/Train+Travel+API/1.0.0", "description": "Mock Server"},
+        {"url": "https://api.example.com", "description": "Production"},
     ],
-    summary="A simple API to manage burgers and orders",
-    description="This API is used to manage burgers and orders in a restaurant",
-    version="0.1.0",
-    title="APItizing Burgers API",
     openapi_tags=tags_metadata,
-    generate_unique_id_function=custom_generate_unique_id_function,
 )
 
-# Simulate in-memory databases
-burgers_db = []
-orders_db = []
+STATIONS = [
+    Station(id="efdbb9d1-02c2-4bc3-afb7-6788d8782b1e", name="Berlin Hauptbahnhof", address="Invalidenstrasse 10557 Berlin, Germany", country_code="DE", timezone="Europe/Berlin"),
+    Station(id="b2e783e1-c824-4d63-b37a-d8d698862f1d", name="Paris Gare du Nord", address="18 Rue de Dunkerque 75010 Paris, France", country_code="FR", timezone="Europe/Paris"),
+]
+TRIPS = [
+    Trip(id="ea399ba1-6d95-433f-92d1-83f67b775594", origin=STATIONS[0].id, destination=STATIONS[1].id, departure_time="2024-02-01T10:00:00Z", arrival_time="2024-02-01T16:00:00Z", price=50, operator="Deutsche Bahn", bicycles_allowed=True, dogs_allowed=True),
+    Trip(id="4d67459c-af07-40bb-bb12-178dbb88e09f", origin=STATIONS[1].id, destination=STATIONS[0].id, departure_time="2024-02-01T12:00:00Z", arrival_time="2024-02-01T18:00:00Z", price=50, operator="SNCF", bicycles_allowed=True, dogs_allowed=True),
+]
+BOOKINGS = [Booking(id="1725ff48-ab45-4bb5-9d02-88745177dedb", trip_id=TRIPS[0].id, passenger_name="John Doe", has_bicycle=True, has_dog=True)]
+
+
+def page_links(path: str, page: int) -> CollectionLinks:
+    return CollectionLinks(self=f"https://api.example.com/{path}?page={page}", next=f"https://api.example.com/{path}?page={page + 1}", prev=f"https://api.example.com/{path}?page={page - 1}" if page > 1 else None)
+
+
+def booking_links(booking_id: UUID) -> dict[str, str]:
+    return {"self": f"https://api.example.com/bookings/{booking_id}"}
+
 
 @app.get("/scalar", include_in_schema=False)
 async def scalar_html():
-    return get_scalar_api_reference(
-        openapi_url=app.openapi_url,
-        title=app.title + " - Scalar",
-    )
-
-@app.post(
-    "/burger/",
-    response_model=BurgerOutput,
-    status_code=status.HTTP_201_CREATED,
-    tags=["burger"],
-)
-def create_burger(burger: BurgerCreate):
-    """Create a burger"""
-
-    burger_data = BurgerData(
-        id=len(burgers_db),
-        **burger.dict(),
-    )
-
-    burgers_db.append(burger_data)
-    return BurgerOutput(**burger_data.dict())
+    return get_scalar_api_reference(openapi_url=app.openapi_url, title=app.title + " - Scalar")
 
 
-@app.get(
-    "/burger/",
-    response_model=List[BurgerOutput],
-    tags=["burger"],
-    openapi_extra={
-        "x-speakeasy-retries": {
-            "strategy": "backoff",
-            "backoff": {
-                "initialInterval": 500,
-                "maxInterval": 60000,
-                "maxElapsedTime": 3600000,
-                "exponent": 1.5,
-            },
-            "statusCodes": [
-                "5XX",
-            ],
-            "retryConnectionErrors": True,
-        }
-    },
-)
-def list_burgers(key: str = Depends(header_scheme)):
-    """List all burgers"""
-
-    if key != API_KEY:
-        raise HTTPException(status_code=401, detail="Invalid API Key")
-
-    return [BurgerOutput(**burger_data.dict()) for burger_data in burgers_db]
+@app.get("/stations", response_model=StationCollection, tags=["Stations"], operation_id="get-stations")
+def get_stations(page: int = Query(1, ge=1), search: Optional[str] = None, country: Optional[str] = None):
+    stations = STATIONS
+    if search:
+        stations = [station for station in stations if search.lower() in station.name.lower() or search.lower() in station.address.lower()]
+    if country:
+        stations = [station for station in stations if station.country_code == country]
+    return StationCollection(data=stations, links=page_links("stations", page))
 
 
-@app.get(
-    "/burger/{burger_id}",
-    response_model=BurgerOutput,
-    responses={404: OPENAPI_RESPONSE_BURGER_NOT_FOUND},
-    tags=["burger"],
-)
-def read_burger(burger_id: Annotated[int, Path(title="Burger ID")]):
-    """Read a burger"""
-
-    for burger_data in burgers_db:
-        if burger_data.id == burger_id:
-            return BurgerOutput(**burger_data.dict())
-    return response_burger_not_found(burger_id)
+@app.get("/trips", response_model=TripCollection, tags=["Trips"], operation_id="get-trips")
+def get_trips(origin: UUID, destination: UUID, date: datetime, bicycles: bool = False, dogs: bool = False, page: int = Query(1, ge=1)):
+    trips = [trip for trip in TRIPS if trip.origin == origin and trip.destination == destination]
+    if bicycles:
+        trips = [trip for trip in trips if trip.bicycles_allowed]
+    if dogs:
+        trips = [trip for trip in trips if trip.dogs_allowed]
+    data = [TripWithLinks(**trip.model_dump(), links={"self": f"https://api.example.com/trips/{trip.id}", "origin": f"https://api.example.com/stations/{trip.origin}", "destination": f"https://api.example.com/stations/{trip.destination}"}) for trip in trips]
+    return TripCollection(data=data, links=page_links("trips", page))
 
 
-@app.put(
-    "/burger/{burger_id}",
-    response_model=BurgerOutput,
-    responses={404: OPENAPI_RESPONSE_BURGER_NOT_FOUND},
-    tags=["burger"],
-)
-def update_burger(burger_id: int, burger: BurgerUpdate):
-    """Update a burger"""
-
-    for i, burger_data in enumerate(burgers_db):
-        if burger_data.id == burger_id:
-            burger_updated = burger_data.dict()
-            burger_updated.update(burger.dict(exclude_unset=True))
-            burgers_db[i] = BurgerData(**burger_updated)
-            return BurgerOutput(**burgers_db[i].dict())
-    return response_burger_not_found(burger_id)
+@app.get("/bookings", response_model=BookingCollection, tags=["Bookings"], operation_id="get-bookings")
+def get_bookings(page: int = Query(1, ge=1)):
+    data = [BookingWithLinks(**booking.model_dump(), links=booking_links(booking.id)) for booking in BOOKINGS]
+    return BookingCollection(data=data, links=page_links("bookings", page))
 
 
-@app.delete(
-    "/burger/{burger_id}",
-    responses={
-        200: {"model": ResponseMessage, "description": "Burger deleted"},
-        404: OPENAPI_RESPONSE_BURGER_NOT_FOUND,
-    },
-    tags=["burger"],
-)
-def delete_burger(burger_id: Annotated[int, Path(title="Burger ID")]):
-    """Delete a burger"""
-
-    for i, burger_data in enumerate(burgers_db):
-        if burger_data.id == burger_id:
-            burger_name = burger_data.name
-            burgers_db.pop(i)
-            return JSONResponse(
-                status_code=200,
-                content={"message": f"{burger_name} deleted"},
-            )
-    return response_burger_not_found(burger_id)
+@app.post("/bookings", response_model=BookingWithLinks, status_code=status.HTTP_201_CREATED, tags=["Bookings"], operation_id="create-booking")
+def create_booking(booking: Booking):
+    BOOKINGS.append(booking)
+    return BookingWithLinks(**booking.model_dump(), links=booking_links(booking.id))
 
 
-@app.post(
-    "/order/",
-    response_model=OrderOutput,
-    status_code=status.HTTP_201_CREATED,
-    tags=["order"],
-)
-def create_order(order: OrderCreate):
-    """Create an order"""
-
-    order_data = OrderData(
-        id=len(orders_db),
-        time=datetime.now(),
-        status=OrderStatus.CREATED,
-        **order.dict(),
-    )
-
-    orders_db.append(order_data)
-    return OrderOutput(**order_data.dict())
+@app.get("/bookings/{booking_id}", response_model=BookingWithLinks, tags=["Bookings"], operation_id="get-booking")
+def get_booking(booking_id: UUID):
+    booking = next((item for item in BOOKINGS if item.id == booking_id), None)
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    return BookingWithLinks(**booking.model_dump(), links=booking_links(booking.id))
 
 
-@app.get("/order/", response_model=List[OrderOutput], tags=["order"])
-def list_orders():
-    """List all orders"""
-
-    return [OrderOutput(**order_data.dict()) for order_data in orders_db]
-
-
-@app.get(
-    "/order/{order_id}",
-    response_model=OrderOutput,
-    responses={404: OPENAPI_RESPONSE_ORDER_NOT_FOUND},
-    tags=["order"],
-)
-def read_order(order_id: Annotated[int, Path(title="Order ID")]):
-    """Read an order"""
-
-    for order in orders_db:
-        if order.id == order_id:
-            return OrderOutput(**order.dict())
-    return response_order_not_found(order_id)
+@app.delete("/bookings/{booking_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Bookings"], operation_id="delete-booking")
+def delete_booking(booking_id: UUID):
+    for index, booking in enumerate(BOOKINGS):
+        if booking.id == booking_id:
+            BOOKINGS.pop(index)
+            return None
+    raise HTTPException(status_code=404, detail="Booking not found")
 
 
-@app.put(
-    "/order/{order_id}",
-    response_model=OrderOutput,
-    responses={404: OPENAPI_RESPONSE_ORDER_NOT_FOUND},
-    tags=["order"],
-)
-def update_order(order_id: Annotated[int, Path(title="Order ID")], order: OrderUpdate):
-    """Update an order"""
-
-    for i, order_data in enumerate(orders_db):
-        if order_data.id == order_id:
-            updated_order = order_data.dict()
-            updated_order.update(order.dict(exclude_unset=True))
-            orders_db[i] = OrderData(**updated_order)
-            return OrderOutput(**orders_db[i].dict())
-    return response_order_not_found(order_id)
-
-
-@app.webhooks.post(
-    "order-status-changed",
-    operation_id="webhookOrderStatusChanged",
-)
-def webhook_order_status_changed(body: OrderOutput):  # pylint: disable=unused-argument
-    """
-    When an order status is changed, this webhook will be triggered.
-
-    The server will send a `POST` request with the order details to the webhook URL.
-    """
+@app.post("/bookings/{booking_id}/payment", response_model=PaymentWithLinks, tags=["Payments"], operation_id="create-booking-payment")
+def create_booking_payment(booking_id: UUID, payment: BookingPayment):
+    if not any(booking.id == booking_id for booking in BOOKINGS):
+        raise HTTPException(status_code=404, detail="Booking not found")
+    source = payment.source.model_copy(deep=True)
+    source.number = "************" + source.number[-4:]
+    result = payment.model_copy(update={"id": uuid4(), "source": source, "status": PaymentStatus.succeeded})
+    return PaymentWithLinks(**result.model_dump(), links={"booking": f"https://api.example.com/bookings/{booking_id}"})
 
 
 def custom_openapi():
-    """Customize OpenAPI Output"""
-
     if app.openapi_schema:
         return app.openapi_schema
-
-    openapi_schema = get_openapi(
-        title=app.title,
-        version=app.version,
-        summary=app.summary,
-        description=app.description,
-        servers=app.servers,
-        routes=app.routes,
-        tags=app.openapi_tags,
-        webhooks=app.webhooks.routes,
-    )
-
-    openapi_schema["x-speakeasy-retries"] = {
+    schema = get_openapi(title=app.title, version=app.version, summary=app.summary, description=app.description, servers=app.servers, routes=app.routes, tags=app.openapi_tags)
+    schema["x-speakeasy-retries"] = {
         "strategy": "backoff",
-        "backoff": {
-            "initialInterval": 500,
-            "maxInterval": 60000,
-            "maxElapsedTime": 3600000,
-            "exponent": 1.5,
-        },
-        "statusCodes": [
-            "5XX",
-        ],
+        "backoff": {"initialInterval": 500, "maxInterval": 60000, "maxElapsedTime": 3600000, "exponent": 1.5},
+        "statusCodes": ["5XX"],
         "retryConnectionErrors": True,
     }
-
-    app.openapi_schema = openapi_schema
-    return app.openapi_schema
+    schema["components"]["securitySchemes"] = {
+        "OAuth2": {
+            "type": "oauth2",
+            "flows": {
+                "authorizationCode": {
+                    "authorizationUrl": "https://example.com/oauth/authorize",
+                    "tokenUrl": "https://example.com/oauth/token",
+                    "scopes": {"read": "Read access", "write": "Write access"},
+                }
+            },
+        }
+    }
+    schema["security"] = [{"OAuth2": ["read"]}]
+    app.openapi_schema = schema
+    return schema
 
 
 app.openapi = custom_openapi
