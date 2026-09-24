@@ -12,7 +12,7 @@ export default fp(async (fastify) => {
   await fastify.register(swagger, {
     // Use `openapi` key to specify an OpenAPI v3 document
     openapi: {
-      openapi: "3.1.2",
+      openapi: "3.2.0",
       info: {
         title: "Train Travel API",
         description: "API for finding and booking train trips across Europe.",

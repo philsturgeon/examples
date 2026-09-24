@@ -27,7 +27,7 @@ To generate SDKs, install the Speakeasy CLI.
 Current npm dependencies in this example:
 
 - `fastify@^5.8.0`
-- `@fastify/swagger@^9.7.0`
+- `@fastify/swagger@^9.9.0`
 - `@scalar/fastify-api-reference@^1.25.11`
 - `@fastify/autoload@^6.3.0`
 - `@fastify/sensible@^6.0.0`
