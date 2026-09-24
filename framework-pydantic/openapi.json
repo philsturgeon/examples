@@ -267,6 +267,7 @@
           },
           "departure_time": {
             "type": "string",
+            "format": "date-time",
             "title": "Departure Time",
             "description": "Departure time in ISO 8601 format.",
             "examples": [
@@ -275,6 +276,7 @@
           },
           "arrival_time": {
             "type": "string",
+            "format": "date-time",
             "title": "Arrival Time",
             "description": "Arrival time in ISO 8601 format.",
             "examples": [

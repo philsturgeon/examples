@@ -1,7 +1,7 @@
 from typing import Literal
 
 from fastapi import FastAPI, Query
-from pydantic import BaseModel, Field
+from pydantic import AwareDatetime, BaseModel, Field
 
 app = FastAPI(
     title="Train Travel API",
@@ -50,12 +50,12 @@ class Trip(BaseModel):
         description="Destination station ID.",
         examples=["b2e783e1-c824-4d63-b37a-d8d698862f1d"],
     )
-    departure_time: str = Field(
+    departure_time: AwareDatetime = Field(
         ...,
         description="Departure time in ISO 8601 format.",
         examples=["2026-08-24T08:15:00Z"],
     )
-    arrival_time: str = Field(
+    arrival_time: AwareDatetime = Field(
         ...,
         description="Arrival time in ISO 8601 format.",
         examples=["2026-08-24T10:05:00Z"],

@@ -183,12 +183,14 @@ components:
           - b2e783e1-c824-4d63-b37a-d8d698862f1d
         departure_time:
           type: string
+          format: date-time
           title: Departure Time
           description: Departure time in ISO 8601 format.
           examples:
           - '2026-08-24T08:15:00Z'
         arrival_time:
           type: string
+          format: date-time
           title: Arrival Time
           description: Arrival time in ISO 8601 format.
           examples:
